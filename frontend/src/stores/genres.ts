@@ -6,8 +6,12 @@ export const useGenresStore = create<IGenresStore>((set) => ({
     genres: [],
     setGenres: (genres) => set({ genres }),
     getGenres: async () => {
-        const genres = await getGenres();
-        set({ genres });
+        try {
+            const genres = await getGenres();
+            set({ genres });
+        } catch (error) {
+            console.log(error);
+        }
     }
 
 }));

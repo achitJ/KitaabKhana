@@ -1,6 +1,11 @@
 import instance from "./config";
 
 export const getGenres = async () => {
-    const { data } = await instance.get("/genres");
-    return data;
+    try {
+        const { data } = await instance.get("/genres");
+        return data;
+    } catch (error) {
+        console.log(error);
+        return error;
+    }
 }

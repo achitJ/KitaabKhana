@@ -1,16 +1,19 @@
 import 'dotenv/config';
 import express, {Application} from 'express';
-import ApiRouter from './api';
-import GoogleAuthRouter from './api/googleAuth';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import connectToDB from './loaders/mongoose';
-import cookieParser from 'cookie-parser';
 import config from './config';
+import ApiRouter from './api';
+import GoogleAuthRouter from './api/googleAuth';
 
-const { port } = config;
+const { port, clientURI } = config;
 const app:Application = express();
 
-app.use(cors());
+app.use(cors({
+    origin: clientURI,
+    credentials: true,
+}));
 app.use(cookieParser());
 app.use(express.json());
 app.use('/api', ApiRouter);
