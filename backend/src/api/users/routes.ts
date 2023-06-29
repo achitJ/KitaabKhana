@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { loginUser } from "./controller";
+import { loginUser, registerUser } from "./controller";
 
 const router:Router = Router();
 
@@ -10,5 +10,8 @@ router.route('/')
 
 router.route('/login')
     .post(loginUser);
+
+router.route('/register')
+    .post(registerUser);
 
 export default router;

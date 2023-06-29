@@ -13,6 +13,11 @@ export const loginUser: RequestHandler = async (
         const user: IUsers | MongooseError | undefined | null = await UserRepo.findByUserEmail(email);
         
         if(user instanceof MongooseError) {
+            if(user.name === 'ValidationError') {
+                res.status(400).json({message: 'Invalid data'});
+                return;
+            }
+
             res.status(500).json({message: 'Internal server error'});
             return;
         }
@@ -48,6 +53,11 @@ export const registerUser: RequestHandler = async (
 
         const tempUser: IUsers | MongooseError | undefined | null = await UserRepo.findByUserEmail(email);
 
+        if(tempUser instanceof MongooseError) {
+            res.status(500).json({message: 'Internal server error'});
+            return;
+        }
+
         if(tempUser) {
             res.status(400).json({message: 'User already exists'});
             return;
@@ -62,6 +72,11 @@ export const registerUser: RequestHandler = async (
         });
 
         if(user instanceof MongooseError) {
+            if(user.name === 'ValidationError') {
+                res.status(400).json({message: 'Invalid data'});
+                return;
+            }
+
             res.status(500).json({message: 'Internal server error'});
             return;
         }
@@ -70,6 +85,8 @@ export const registerUser: RequestHandler = async (
             res.status(400).json({message: 'User not created'});
             return;
         }
+
+        console.log({user, tempUser});
 
         res.status(201).json({message: 'User created', user});
     } catch (error) {
