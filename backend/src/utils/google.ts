@@ -38,10 +38,6 @@ export function getTokens({
     scope: string;
     id_token: string;
 }> {
-    /*
-     * Uses the code to get tokens
-     * that can be used to fetch the user's profile
-     */
     const url = "https://oauth2.googleapis.com/token";
     const values = {
         code,
