@@ -1,6 +1,8 @@
 import BooksModel from "../models/Books";
-import { IBookDocument, IBooks } from "../../types/models";
-import { MongooseError } from "mongoose";
+import { IBookDocument, IBooks, IGenreDocument } from "../../types/models";
+import { MongooseError, Query } from "mongoose";
+import { IFindBooksParams, IFindBooksQuery } from "../../types/params";
+import GenresRepo from "./Genre";
 
 class BooksRepo {
     static async createNewBook({
@@ -41,33 +43,47 @@ class BooksRepo {
         }
     }
 
-    static async findBook({
+    static async findBooks({
         title,
         author,
-        dop,
+        dopStart,
+        dopEnd,
         genre,
         sortBy,
         limit,
         skip
-    }: {
-        title?: string;
-        author?: string;
-        dop?: Date;
-        genre?: string;
-        sortBy: 'none' | 'title' | 'author' | 'dop';
-        limit: number;
-        skip: number;
-    }) {
+    }: IFindBooksParams): 
+    Promise<IBookDocument[] | MongooseError | undefined> {
         try {
+            const query = {} as IFindBooksQuery;
             const sort: string = sortBy === 'none' ? '' : sortBy;
 
+            if (title) {
+                query['title'] = new RegExp(`^${title}`, 'i');
+            }
+
+            if (author) {
+                query['author'] = new RegExp(`^${author}`, 'i');
+            }
+
+            if (dopStart && dopEnd) {
+                query['dop'] = {
+                    $gte: dopStart,
+                    $lte: dopEnd
+                };
+            }
+
+            if (genre) {
+                const genreDoc : IGenreDocument | MongooseError | null | undefined = await GenresRepo.findGenreByName(genre);
+                
+                if (genreDoc && !(genreDoc instanceof MongooseError)) {
+                    query['genre'] = genreDoc._id;
+                }
+            }
+
+
             const books: IBookDocument[] | null = await BooksModel
-                .find({
-                    title,
-                    author,
-                    dop,
-                    genre
-                })
+                .find(query)
                 .sort(sort)
                 .limit(limit)
                 .skip(skip);
@@ -80,11 +96,7 @@ class BooksRepo {
         }
     }
 
-    static async autocompleteBook({
-        query
-    }: {
-        query: string;
-    }) {
+    static async autocompleteBook(query: string) {
         try {
             const books: IBookDocument[] | null = await BooksModel
                 .aggregate([
