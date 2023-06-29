@@ -1,5 +1,6 @@
 import Mongoose, { Schema, Model } from "mongoose";
 import { IUsers } from "../../types/models";
+import { hash } from "../../utils/hash";
 
 const UsersSchema: Schema<IUsers> = new Schema<IUsers>({
     name: {
@@ -33,6 +34,29 @@ const UsersSchema: Schema<IUsers> = new Schema<IUsers>({
 }, {
     timestamps: true,
 });
+
+UsersSchema.methods.toJSON = function() {
+
+    const user = this;
+    const userObject = user.toObject();
+
+    delete userObject.password;
+    delete userObject.createdAt;
+    delete userObject.updatedAt;
+    delete userObject.__v;
+
+    return userObject;
+}
+
+UsersSchema.pre('save', function(next) {
+    if(!this.password || !this.isModified('password')) {
+        return next();
+    }
+
+    this.password = hash(this.password);
+    next();
+})
+
 
 const Users: Model<IUsers> = Mongoose.model<IUsers>('Users', UsersSchema);
 
