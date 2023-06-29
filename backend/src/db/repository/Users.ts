@@ -1,5 +1,5 @@
 import { MongooseError } from "mongoose";
-import { IUsers } from "../../types/models";
+import { IUsers, IUserDocument } from "../../types/models";
 import UsersModel from "../models/Users";
 
 class UserRepo {
@@ -9,9 +9,9 @@ class UserRepo {
         password,
         isAdmin,
         isGoogleUser
-    }: IUsers) : Promise<IUsers | MongooseError | undefined> {
+    }: IUsers) : Promise<IUserDocument | MongooseError | undefined> {
         try {
-            const newUser = new UsersModel({
+            const newUser:IUserDocument = new UsersModel({
                 name,
                 email,
                 password,
@@ -29,9 +29,10 @@ class UserRepo {
     }
 
     static async findByUserEmail(email: string):
-    Promise<IUsers | MongooseError | undefined | null> {
+    Promise<IUserDocument | MongooseError | undefined | null> {
+
         try {
-            const user: IUsers | null = await UsersModel.findOne({email});
+            const user: IUserDocument | null = await UsersModel.findOne({email});
             return user;
         } catch (error) {
             if(error instanceof MongooseError) {
@@ -44,7 +45,7 @@ class UserRepo {
     static async findUserById(id: string): 
     Promise<IUsers | MongooseError | undefined | null> {
         try {
-            const user: IUsers | null = await UsersModel.findById(id);
+            const user: IUserDocument | null = await UsersModel.findById(id);
             return user;
         } catch (error) {
             if(error instanceof MongooseError) {

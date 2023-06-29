@@ -1,10 +1,12 @@
-import { Router, Request, Response } from "express";
+import { Router, Response } from "express";
+import { RequestWithUser } from "../../types/customExpress";
 import { loginUser, registerUser } from "./controller";
+import { auth } from "../../middleware/auth";
 
 const router:Router = Router();
 
 router.route('/')
-    .get((req: Request, res: Response): void => {
+    .get(auth, (req: RequestWithUser, res: Response): void => {
         res.send('users route');
     });
 

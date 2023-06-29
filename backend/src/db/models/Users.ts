@@ -58,6 +58,6 @@ UsersSchema.pre('save', function(next) {
 })
 
 
-const Users: Model<IUsers> = Mongoose.model<IUsers>('Users', UsersSchema);
+const UsersModel: Model<IUsers> = Mongoose.model<IUsers>('Users', UsersSchema);
 
-export default Users;
+export default UsersModel;

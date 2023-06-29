@@ -1,8 +1,12 @@
 import { Request, RequestHandler, Response } from "express";
 import { MongooseError } from "mongoose";
-import { IUsers } from "../../types/models";
+import jwt from "jsonwebtoken";
+import { IUsers, IUserDocument } from "../../types/models";
 import UserRepo from "../../db/repository/Users";
 import { compare } from "../../utils/hash";
+import config from "../../config";
+
+const { jwtSecret, authCookieName, authCookieExpiry } = config;
 
 export const loginUser: RequestHandler = async (
     req: Request, 
@@ -10,7 +14,7 @@ export const loginUser: RequestHandler = async (
 ): Promise<void> => {
     const { email, password } = req.body;
     try {
-        const user: IUsers | MongooseError | undefined | null = await UserRepo.findByUserEmail(email);
+        const user: IUserDocument | MongooseError | undefined | null = await UserRepo.findByUserEmail(email);
         
         if(user instanceof MongooseError) {
             if(user.name === 'ValidationError') {
@@ -36,6 +40,14 @@ export const loginUser: RequestHandler = async (
             res.status(400).json({message: 'Invalid credentials'});
             return;
         }
+
+        const token = jwt.sign({id: user._id}, jwtSecret, {expiresIn: '1d'});
+
+        res.cookie(authCookieName, token, {
+            maxAge: authCookieExpiry,
+            httpOnly: true,
+            secure: true,
+        });
         
         res.status(200).json({message: 'Login successful', user});
     } catch (error) {
@@ -51,7 +63,7 @@ export const registerUser: RequestHandler = async (
     const { name, email, password, isAdmin, isGoogleUser } = req.body;
     try {
 
-        const tempUser: IUsers | MongooseError | undefined | null = await UserRepo.findByUserEmail(email);
+        const tempUser: IUserDocument | MongooseError | undefined | null = await UserRepo.findByUserEmail(email);
 
         if(tempUser instanceof MongooseError) {
             res.status(500).json({message: 'Internal server error'});
@@ -63,7 +75,7 @@ export const registerUser: RequestHandler = async (
             return;
         }
 
-        const user: IUsers | MongooseError | undefined = await UserRepo.createNewUser({
+        const user: IUserDocument | MongooseError | undefined = await UserRepo.createNewUser({
             name,
             email,
             password,
@@ -86,7 +98,13 @@ export const registerUser: RequestHandler = async (
             return;
         }
 
-        console.log({user, tempUser});
+        const token = jwt.sign({id: user._id}, jwtSecret, {expiresIn: '1d'});
+
+        res.cookie(authCookieName, token, {
+            maxAge: authCookieExpiry,
+            httpOnly: true,
+            secure: true,
+        });
 
         res.status(201).json({message: 'User created', user});
     } catch (error) {

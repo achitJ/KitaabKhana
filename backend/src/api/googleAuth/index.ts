@@ -2,7 +2,10 @@ import { Router } from "express";
 import axios from "axios";
 import jwt from "jsonwebtoken";
 import { getGoogleAuthURL, getTokens } from "../../utils/google";
+import { IUserDocument, IUsers } from "../../types/models";
 import config from "../../config";
+import UserRepo from "../../db/repository/Users";
+import { MongooseError } from "mongoose";
 
 const { 
     clientURI, 
@@ -46,14 +49,61 @@ router.get(`/${redirectURI}`, async (req, res) => {
         throw new Error(error.message);
       });
   
-    const token = jwt.sign(googleUser, jwtSecret);
-  
+    const user: IUserDocument | MongooseError | null | undefined = await UserRepo.findByUserEmail(googleUser.email);
+    let token = "";
+
+    if(!user) {
+        const newUser: IUserDocument | MongooseError | undefined = await UserRepo.createNewUser({
+            name: googleUser.name,
+            email: googleUser.email,
+            isAdmin: false,
+        } as IUsers);
+
+        if(!newUser) {
+            return res.status(500).json({
+                message: "Internal server error",
+            });
+        }
+
+        if(newUser instanceof MongooseError) {
+            if(newUser.name === "ValidationError") {
+                return res.status(400).json({
+                    message: "Invalid data",
+                });
+            }
+
+            return res.status(500).json({
+                message: "Internal server error",
+            });
+        }
+
+        token = jwt.sign({ id: newUser._id }, jwtSecret, {
+            expiresIn: '1d',
+        });
+    } else {
+        if(user instanceof MongooseError) {
+            if(user.name === "ValidationError") {
+                return res.status(400).json({
+                    message: "Invalid data",
+                });
+            }
+
+            return res.status(500).json({
+                message: "Internal server error",
+            });
+        }
+
+        token = jwt.sign({ id: user._id }, jwtSecret, {
+            expiresIn: '1d',
+        });
+    }
+
     res.cookie(authCookieName, token, {
-      maxAge: authCookieExpiry,
-      httpOnly: true,
-      secure: false,
+        maxAge: authCookieExpiry,
+        httpOnly: true,
+        secure: true,
     });
-  
+
     res.redirect(clientURI);
 });
 
