@@ -28,6 +28,6 @@ export const auth = (req:RequestWithUser, res:Response, next:NextFunction):void 
         req.user = {id: decoded.id};
         next();
     } catch(err) {
-        res.status(400).json({ message: 'Token is not valid' });
+        res.status(401).json({ message: 'Token is not valid' });
     }
 }

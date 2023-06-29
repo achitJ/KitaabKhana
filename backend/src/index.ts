@@ -7,7 +7,6 @@ import connectToDB from './loaders/mongoose';
 import cookieParser from 'cookie-parser';
 import config from './config';
 
-
 const { port } = config;
 const app:Application = express();
 
