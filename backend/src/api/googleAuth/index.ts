@@ -57,6 +57,7 @@ router.get(`/${redirectURI}`, async (req, res) => {
             name: googleUser.name,
             email: googleUser.email,
             isAdmin: false,
+            isGoogleUser: true,
         } as IUsers);
 
         if(!newUser) {

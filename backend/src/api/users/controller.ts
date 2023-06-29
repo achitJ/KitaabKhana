@@ -16,6 +16,11 @@ export const loginUser: RequestHandler = async (
     try {
         const user: IUserDocument | MongooseError | undefined | null = await UserRepo.findByUserEmail(email);
         
+        if(!email || !password) {
+            res.status(400).json({message: 'Invalid credentials'});
+            return;
+        }
+
         if(user instanceof MongooseError) {
             if(user.name === 'ValidationError') {
                 res.status(400).json({message: 'Invalid data'});
