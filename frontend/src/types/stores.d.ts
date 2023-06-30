@@ -7,6 +7,7 @@ export interface IPathStore {
 
 export interface IGenresStore {
     genres: IGenre[];
+    genreNames: string[];
     setGenres: (genres: IGenre[]) => void;
     getGenres: () => Promise<void>;
 }

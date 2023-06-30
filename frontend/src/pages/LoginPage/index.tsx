@@ -16,10 +16,12 @@ import { IconBrandGoogle } from '@tabler/icons-react';
 import { ILoginForm } from '../../types/misc';
 import { IUseFormReturnType } from "../../types/hooks/useForm";
 import { formMetadata } from './utils';
+import { useNavigate } from 'react-router-dom'
 
 export default function LoginPage() {
   const [type, toggle] = useToggle(['login', 'register']);
   const form: IUseFormReturnType = useForm<ILoginForm>(formMetadata);
+  const navigate = useNavigate();
 
   return (
     <Center w="100%" h="98vh">
@@ -29,7 +31,7 @@ export default function LoginPage() {
         </Text>
 
         <Group grow mb="md" mt="md">
-          <Button leftIcon={<IconBrandGoogle />} variant="default" color="gray">
+          <Button leftIcon={<IconBrandGoogle />} variant="default" color="gray" onClick={() => navigate('/home')}>
             Continue with Google  
           </Button>
         </Group>
@@ -77,7 +79,7 @@ export default function LoginPage() {
                 ? 'Already have an account? Login'
                 : "Don't have an account? Register"}
             </Anchor>
-            <Button type="submit" radius="xl">
+            <Button type="submit" radius="xl" onClick={() => {navigate('/home')}}>
               {upperFirst(type)}
             </Button>
           </Group>

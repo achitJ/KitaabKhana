@@ -4,8 +4,11 @@ import {
 	NativeSelect,
 } from "@mantine/core"
 import { DatePickerInput } from "@mantine/dates"
+import { useGenresStore } from "../../stores/genres"
 
 export default function FilterFields() {
+	const genreNames = useGenresStore(state => state.genreNames);
+
 	return (
 		<>
 			<Menu.Item component="div">
@@ -19,7 +22,7 @@ export default function FilterFields() {
 			</Menu.Item>
 			<Menu.Item component="div">
 				<NativeSelect
-					data={['None', 'Fiction', 'Non-Fiction']}
+					data={genreNames}
 					label="Genres"
 				/>
 			</Menu.Item>
